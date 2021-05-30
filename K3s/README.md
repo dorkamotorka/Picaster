@@ -13,42 +13,7 @@ I didn't installed the latest version, because it was causing me to many problem
 
 As always along the way I had couple of problems, such as:
 
-1.)
-	The connection to the server localhost:8080 was refused - did you specify the right host or port?
-
-I solved it, by:
-
-Checking 
-
-	kubectl config view
-
-which should look like:
-
-	apiVersion: v1
-	clusters:
-	- cluster:
-	    certificate-authority-data: DATA+OMITTED
-	    server: https://127.0.0.1:6443
-	  name: default
-	contexts:
-	- context:
-	    cluster: default
-	    user: default
-	  name: default
-	current-context: default
-	kind: Config
-	preferences: {}
-	users:
-	- name: default
-	  user:
-	    client-certificate-data: REDACTED
-	    client-key-data: REDACTED
-
-SOLUTION:
-I broke file on my own with copy-paste things from Public Forums :)
-
-
-2.) Command below:
+1.) Command below:
 
 	sudo systemctl status k3s
 
@@ -63,40 +28,21 @@ Failed with:
 	  Process: 27752 ExecStart=/usr/local/bin/k3s server (code=exited, status=1/FAILURE)
 	 Main PID: 27752 (code=exited, status=1/FAILURE)
 
-SOLUTION:
-Command:
+I solved it by checking/typing in terminal:
 
 	cat memory /proc/cgroups
 
-should output **memory** row in 3rd column with 1, like:
+that should output **memory** row in 3rd column with 1, like:
 
 	memory	2	58	1
 
-If not, add to /boot/firmware/cmdline.txt:
+If not, add to **/boot/firmware/cmdline.txt**:
 
 	cgroup_enable=cpuset
 	cgroup_enable=memory
 	cgroup_memory=1
-
-3.) If command
-
-	kubectl <command>
-
-is asking you for Username and Passwrd you know nothing about, this means you are trying to access someone elses Kubernetes Server and you should change kubectl config file, like in the 1.) mentioned problem above. 
-
-
-TIP:
-
-1.) In order to debug FAILED status of a Service run:
-
-	journalctl -u <service-name>
-
-2.) In order to remove k3s-agent:
-
-	/usr/local/bin/k3s-agent-uninstall.sh
-
-
-4.) k3s-agent service Failed to run and solved it with:
+	
+2.) k3s-agent service Failed to run and solved it with:
 
 a.) by installing k3s-agent with command:
 
@@ -104,14 +50,13 @@ a.) by installing k3s-agent with command:
 
 b.) by adding:
 
-cgroup_enable=cpuset
-cgroup_enable=memory
-cgroup_memory=1
+	cgroup_enable=cpuset
+	cgroup_enable=memory
+	cgroup_memory=1
 
-to /boot/firmware/cmdline.txt.
+to **/boot/firmware/cmdline.txt**.
 
-
-If k3s-agent service fails to run and you get an error:
+3.) If k3s-agent service fails to run and you get an error:
 
 	Node password rejected, contents of '/var/lib/rancher/k3s/agent/node-password.txt' may not match server passwd entry ...
 
@@ -121,9 +66,23 @@ meant in my case that I needed to update the password on the Kubernetes master, 
 	/var/lib/rancher/k3s/agent/node-password.txt # On Kubernetes Client
 
 
-Error didn't yet cause me any troubles later on:
+4.) Error didn't yet cause me any troubles later on:
 	Info: waiting for node node2: nodes \"node2\" is forbidden: User \"node\" cannot get resource \"nodes\" in API group \"\ ...
 	Error: Unable to watch for tunnel endpoints: unknown (get endpoints)
+
+## Useful Tips
+
+1.) In order to debug FAILED status of a Service run:
+
+	journalctl -u <service-name>
+
+2.) In order to remove k3s-agent worker:
+
+	/usr/local/bin/k3s-agent-uninstall.sh
+	
+or k3s server node:
+
+	/usr/local/bin/k3s-uninstall.sh
 
 ## Helm
 

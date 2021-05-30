@@ -13,7 +13,7 @@ I didn't installed the latest version, because it was causing me to many problem
 
 As always along the way I had couple of problems, such as:
 
-1.) Command below:
+- Command below:
 
 	sudo systemctl status k3s
 
@@ -42,7 +42,7 @@ If not, add to **/boot/firmware/cmdline.txt**:
 	cgroup_enable=memory
 	cgroup_memory=1
 	
-2.) k3s-agent service Failed to run and solved it with:
+- k3s-agent service Failed to run and solved it with:
 
 a.) by installing k3s-agent with command:
 
@@ -56,7 +56,7 @@ b.) by adding:
 
 to **/boot/firmware/cmdline.txt**.
 
-3.) If k3s-agent service fails to run and you get an error:
+- If k3s-agent service fails to run and you get an error:
 
 	Node password rejected, contents of '/var/lib/rancher/k3s/agent/node-password.txt' may not match server passwd entry ...
 
@@ -66,17 +66,17 @@ meant in my case that I needed to update the password on the Kubernetes master, 
 	/var/lib/rancher/k3s/agent/node-password.txt # On Kubernetes Client
 
 
-4.) Error didn't yet cause me any troubles later on:
+- Error didn't yet cause me any troubles later on:
 	Info: waiting for node node2: nodes \"node2\" is forbidden: User \"node\" cannot get resource \"nodes\" in API group \"\ ...
 	Error: Unable to watch for tunnel endpoints: unknown (get endpoints)
 
 ## Useful Tips
 
-1.) In order to debug FAILED status of a Service run:
+- In order to debug FAILED status of a Service run:
 
 	journalctl -u <service-name>
 
-2.) In order to remove k3s-agent worker:
+- In order to remove k3s-agent worker:
 
 	/usr/local/bin/k3s-agent-uninstall.sh
 	

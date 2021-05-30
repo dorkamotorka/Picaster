@@ -15,6 +15,8 @@ After that we need to restart dnsmasq service, because its configuration(resolut
 
 	sudo systemctl restart dnsmasq
 
-Once RPDS was setup I needed (on the computer where I will be using DNS resolution) to add its IP to /etc/resolv.conf:
+Once RPDS was setup I needed (on the computer where I will be using DNS resolution) to add its IP to /etc/resolvconf/resolv.conf.d/tail:
 
 	nameserver <DNS-SERVER-IP>
+
+NOTE: If I added the DNS Server IP to the /etc/resolv.conf it was overwritten on boot.

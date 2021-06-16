@@ -11,12 +11,12 @@ In order to apply permanent changes, you must:
 
 - On Server, open /etc/chrony/chrony.conf and add (or uncomment/no need to add if already present):
 
-	local stratum 10
-	allow 0/0
+		local stratum 10
+		allow 0/0
 
 - On Client, open /etc/chrony/chrony.conf and add:
 
-	server <Server-IP> iburst prefer
+		server <Server-IP> iburst prefer
 
 # Double-check
 

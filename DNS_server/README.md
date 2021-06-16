@@ -19,4 +19,4 @@ Once RPDS was setup I needed (on the computer where I will be using DNS resoluti
 
 	nameserver <DNS-SERVER-IP>
 
-NOTE: If I added the DNS Server IP to the /etc/resolv.conf it was overwritten on boot.
+### NOTE: If I added the DNS Server IP to the /etc/resolv.conf it was overwritten on boot.

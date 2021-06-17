@@ -2,9 +2,9 @@
 
 I used two Raspberry Pi, one as a NTP Server and the other as a Client.
 
-On both I installed chronyd and chronyc:
+On both I install chrony:
 
-	sudo apt install chronyd chronyc
+	sudo apt install chrony
 
 chronyc provides commandline tool that enables you to setup a Server and Client but only until reboot.
 In order to apply permanent changes, you must:

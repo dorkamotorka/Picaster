@@ -48,4 +48,10 @@ dwc_otg.lpm_enable=0 console=tty1 console=ttyAMA0,115200 root=/dev/mmcblk0p2 roo
 I only get uncorrupted data on the first output to the serial console. All consequent are garbaged unfortunately.
 
 
-# TODO: Try flushing the serial port 
+# TODO: Try flushing the serial port
+
+# Debug
+
+To get baudrate on the serial port write to command line:
+
+	sudo stty -F /dev/ttyUSB0 speed

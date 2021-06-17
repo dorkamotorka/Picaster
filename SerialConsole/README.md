@@ -21,18 +21,18 @@ I tested with both Raspberry Pi 4B and 3B+.
 
 - I added to /boot/config.txt
 
-		enable_uart=1 (which does multiple other settings, more: https://www.raspberrypi.org/documentation/configuration/uart.md)
+		enable_uart=1 #(which does multiple other settings, more: https://www.raspberrypi.org/documentation/configuration/uart.md)
 	
 - I added to /boot/cmdline.txt
 
-		console=tty1
+		console=tty1 # Quite spooky, since the number depends upon how many terminal session you have open on the RPi
 		console=ttyAMA0,115200
 		logo.nologo
 		vt.global_cursor_default=0
 	
 - I removed from /boot/cmdline.txt
 
-		quiet
+		quiet # Supresses kernel log on boot
 		plymouth.ignore-serial-consoles
 
 ## Final files
@@ -44,7 +44,7 @@ At the ed both files looked like:
 	disable_overscan=1
 	start_x=1
 	gpu_mem=128
-	init_uart_baud=38400 (wtf?) - This overrided default 115200 baudrate(Nevertheless I was listening with 115200 baudrate)
+	init_uart_baud=38400 #(wtf?) - This overrided default 115200 baudrate(Nevertheless I was listening with 115200 baudrate)
 	boot_delay=2
 	dtparam=i2c_arm=on
 	enable_uart=1

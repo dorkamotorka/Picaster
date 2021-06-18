@@ -60,7 +60,7 @@ At the ed both files looked like:
 
 ## NOTE:
 
-I only get uncorrupted data on the first output to the serial console. All consequent are garbaged unfortunately.
+First couple of times I was receiving corrupted data to the Serial Console. After reboot of both Pi and the PC it started to work nicely and I could also login to the Pi and run programs etc.
 
 
 # TODO: Try flushing the serial port

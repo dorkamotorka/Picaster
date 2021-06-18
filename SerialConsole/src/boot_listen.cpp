@@ -5,6 +5,8 @@
 // 1. Listen on boot until login prompt
 // 2. Enable searhing for a specific pattern in the output
 
+// NOTE: THIS IS NOT YET FINISHED
+
 int main(void) {
 
 	boost::asio::io_service io;

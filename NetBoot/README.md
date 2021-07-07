@@ -85,12 +85,20 @@ Then copy the OS files from partition 2(if above executed this should be in /mnt
 	sudo mkdir -p /srv/nfs/<RANDOM-NAME>
 	sudo cp -r /mnt/Ubuntu20.04/* /srv/nfs/<RANDOM-NAME>
 
-### NOTE: Since you are almost copying the whole file systems which will double the occupied storage space on the SD card, make sure you have sufficient space available. I used a 32GB SD Card, while with 16GB SD card I gout out of space.
+### NOTE: Since you are almost copying the whole file systems which will double the occupied storage space on the SD card, make sure you have sufficient space available. I used a 32GB SD Card, while with 16GB SD card I got out of space.
 
 After you are done copying clean up with:
 
 	sudo umount /mnt/Ubuntu20.04
 	sudo rm -rf /mnt/Ubuntu20.04
+
+
+- Additionaly you need to reconfigure SSH for the Netboot client
+
+	cd <NETBOOT-CLIENT-ROOT-FS>
+	sudo chroot . rm /etc/ssh/ssh_host_*
+	sudo chroot . dpkg-reconfigure openssh-server
+	sudo chroot . systemctl enable ssh
 
 8) In order to boot a remote client we need to share the boot files with it once requested. This is done with Trivial File Transfer Protocol (TFTP).
 Mount the /boot folder of the RPi files (stored in the NFS share) to your TFTP location so your TFTP can serve up the boot files
@@ -154,29 +162,20 @@ NOTE: If you mess up this file, your Pi won't be able to boot!
 
 - /srv/nfs/<RANDOM-NAME>/etc/fstab
 
-	proc            /proc           proc    defaults        0       0
 	<NETBOOT-SERVER-IP>:/srv/nfs/<RANDOM-NAME> /       nfs4     defaults,rw,nolock,proto=tcp,vers=4.1             0       0 # data to be shared to server
-#none            /tmp            tmpfs   defaults        0       0
-#none            /var/run        tmpfs   defaults        0       0
-#none            /var/lock       tmpfs   defaults        0       0
-#none            /var/tmp        tmpfs   defaults        0       0
 
-# TODO: Inspect what is needed here, since the commands like sudo, etc. should work
-
-14) Up to this stage we did a neccesary configuration that will send boot files to the Netboot client, but in order for the client to be useful we also need to serve the rootfile system.
+14) Up to this stage we did a neccesary configuration that will send boot files to the Netboot client, but in order for the client to be fully-functional we also need to serve the rootfile system.
 In order to do so, install an NFS server on the RPi Netboot Server:
 
 	sudo apt install nfs-common nfs-kernel-server
 
-# TODO: What is this file for????
 and add to /etc/exports:
 
 	/srv/nfs/<RANDOM-NAME> *(insecure,rw,async,no_root_squash)
-	/srv/tftpboot/<RANDOM-NAME> *(insecure,rw,async,no_root_squash)
 
 then type in terminal:	
 	
-	sudo exportfs -ra
+	sudo exportfs -ra # More on this command can be find here: https://linux.die.net/man/8/exportfs
 	sudo systemctl enable nfs-kernel-server
 	sudo systemctl restart nfs-kernel-server
 
@@ -271,80 +270,4 @@ Also see stats from the NFS Server:
 
 I don't know why it fails to sent some of the files and in the next try succeeds to do so, but important is that relevant files gets transferred and that you use that client provides back the IP and the hostname. Now you can SSH into the client.
 
-
-
-
-# TODO: Multiple Pis
-16) Clusters? You have more than one Pi? You can use an overlayfs mount on your server to provide multiple Pis their operating system using a single base root file system and then using overlays to give each Pi its own space for storage and FS modifications.
-
-If you got this far then this should be easy:
-
-On your proper server - not a pi
-
-17) Create mounts for overlay fs based mounts so we can use the root fs as a lower dir (google overlayfs)
-
-	#/etc/fstab
-
-	overlay /srv/nfs/6b0bb1f6 overlay defaults,lowerdir=/srv/nfs/ubuntu-rpi4-lower,upperdir=/srv/nfs/6b0bb1f6-upper,workdir=/srv/nfs/6b0bb1f6-work,nfs_export=on,index=on 0 0
-	overlay /srv/nfs/68e71308 overlay defaults,lowerdir=/srv/nfs/ubuntu-rpi4-lower,upperdir=/srv/nfs/68e71308-upper,workdir=/srv/nfs/68e71308-work,nfs_export=on,index=on 0 0
-
-18) Create the FS system to support the overlays, mine looks like this for 3 pis.
-
-	# this is inside /srv/nfs
-
-	drwxr-xr-x  1 root root 4096 Sep  7 12:47 68e71308
-	drwxr-xr-x  3 root root 4096 Sep  7 12:47 68e71308-upper
-	drwxr-xr-x  3 root root 4096 Sep  7 13:25 68e71308-work
-	drwxr-xr-x  1 root root 4096 Sep  7 12:13 6b0bb1f6
-	drwxr-xr-x  2 root root 4096 Sep  7 12:13 6b0bb1f6-upper
-	drwxr-xr-x  4 root root 4096 Sep  7 13:25 6b0bb1f6-work
-	drwxr-xr-x  1 root root 4096 Sep  7 12:47 917c9833
-	drwxr-xr-x  2 root root 4096 Sep  7 11:49 917c9833-upper
-	drwxr-xr-x  2 root root 4096 Sep  7 11:34 917c9833-work
-	drwxr-xr-x 21 root root 4096 Sep  6 19:58 ubuntu-rpi4-lower
-
-19) You need to put an /etc/fstab inside the merged folder for the mount (not the upper or work dirs, just the plain serial named one), which will override the ubuntu-rpi4-lower provided ones. Google fusefs or overlayfs for more info, (it's how docker containers work don't ya know :)
-
-20) Create a cmdline.txt inside each merged folder inside /srv/nfs/<serial>/boot/cmdline.txt
-
-21) Export the merged folders over nfs so ours pis can use them as before:
-
-	#/etc/exports
-	/srv/nfs/6b0bb1f6 *(rw,sync,no_subtree_check,no_root_squash,fsid=1)
-	/srv/nfs/917c9833 *(rw,sync,no_subtree_check,no_root_squash,fsid=2)
-	/srv/nfs/68e71308 *(rw,sync,no_subtree_check,no_root_squash,fsid=3)
-	exportfs -ra
-
-22) Adding a new Pi is then just a case:
-
-22.0) Update the boot loader
-
-22.1 Creating three empty folders on the server
-
-	mkdir /srv/nfs/<serial>
-	mkdir /srv/nfs/<serial>-work
-	mkdir /srv/nfs/<serial>-upper
-
-22.2) Adding an fstab with the mount options for the new serial and upper/work dirs
-
-22.3) Adding an cmdline.txt with the right NFS location
-
-23) Uber automation If you want you can create a hook script inside the initrd of your RaspberryPi SD card which updates the bootloader for you and pings a web server with its serial which then will add the mounts by the time the Pi has rebooted itself, its already booting off the network. Ill provide that at some point.
-
-
-
-# TODO: Enable the Fan on the Pi!
-
-# TODO: Reconfigure SSH
-cd /nfs/client1
-sudo mount --bind /dev dev
-sudo mount --bind /sys sys
-sudo mount --bind /proc proc
-sudo chroot . rm /etc/ssh/ssh_host_*
-sudo chroot . dpkg-reconfigure openssh-server
-sudo chroot . systemctl enable ssh
-sudo umount dev sys proc
-
-
-# TODO: Incorporate debug info from here:
-https://linuxhit.com/raspberry-pi-pxe-boot-netbooting-a-pi-4-without-an-sd-card/#14-create-the-nfs-tftp-boot-directories-and-create-our-base-netboot-filesystem
+# NOTE: This post is regularly updated, make sure you use it on your on resposiblity.

@@ -5,28 +5,28 @@ I also used a RPi touchscreen at the last stage to ease the debugging of boot pr
 
 Make sure you are using 32GB SD card on RPi Netboot Server. It will make sense later on.
 
-# On the RPi Netboot Client
+## On the RPi Netboot Client
 
-1) Install a RaspberryPi OS onto an SDCard.
+### Install a RaspberryPi OS onto an SDCard.
 
-2) Boot the Rpi4 with the Raspberry OS SDCard, login and run the following to enable ssh (Test the ssh connection, which will also generate a ssh-key neccesery for the next step):
+### Boot the Rpi4 with the Raspberry OS SDCard, login and run the following to enable ssh (Test the ssh connection, which will also generate a ssh-key neccesery for the next step):
 
 	cd /boot
 	touch ssh
 	reboot
 
-*) update and upgrade Pi
+### Update & Upgrade Pi & Install optional packages
 
 	sudo apt update && sudo apt upgrade -y
 	sudo apt install vim
 
-NOTE: If you don't have a display, keyboard and a mouse to plug into Pi it is better to add the ssh file already after writing the image to the SD card on PC, otherwise you won't be able to ssh into the Pi. Just open up a folder PI_BOOT(has also other boot files like start.elf etc.) on SD Card and add an empty file named ssh.
+#### NOTE: If you don't have a display, keyboard and a mouse to plug into Pi it is better to add the ssh file already after writing the image to the SD card on PC, otherwise you won't be able to ssh into the Pi. Just open up a folder PI_BOOT(has also other boot files like start.elf etc.) on SD Card and add an empty file named ssh.
 
-3) Update the boot loader on the RPi
-NOTE: You might want to ensure the firmware version if this post gets old.
+### Update the boot loader on the RPi
 
 	wget https://github.com/raspberrypi/rpi-eeprom/raw/master/firmware/stable/pieeprom-2021-04-29.bin
 	sudo rpi-eeprom-config pieeprom-2021-04-29.bin > bootconf.txt
+#### NOTE: You might want to ensure the firmware version if this post gets old.
 
 Add to the bottom of bootconf.txt:
 
@@ -46,7 +46,7 @@ Reboot Pi and remove the SD card:
 
 	sudo reboot
 
-4) Your RPi will now have been rebooted and will be pinging your network for the DHCP response. Both Read and Green LED should Ilumminate and persist ON without blinking.
+### Your RPi will now have been rebooted and will be pinging your network for the DHCP response. Both Read and Green LED should Ilumminate and persist ON without blinking.
 In order to make sure Netboot client is pinging the network, type on any device connected to the same local network:
 
 	sudo tcpdump -i <network-interface> port bootpc
@@ -58,22 +58,20 @@ and you should be seeing something like:
 	
 	12:17:24.974995 IP 0.0.0.0.bootpc > 255.255.255.255.bootps: BOOTP/DHCP, Request from dc:a6:32:60:56:7d (oui Unknown), length 322
 
-If your Pi does not boot it is possible that something went wrong during the boot process. 
-Green LED should help you troubleshoot the situation: https://www.raspberrypi.org/documentation/configuration/led_blink_warnings.md
+#### NOTE: If your Pi does not boot it is possible that something went wrong during the boot process. Green LED should help you troubleshoot the situation: https://www.raspberrypi.org/documentation/configuration/led_blink_warnings.md
 
+## On RPi Netboot Server
 
-# On RPi Netboot Server
+### Install Ubuntu 20.04 onto the SD Card, plug it into your Pi and boot it up
 
-5) Install Ubuntu 20.04 onto the SD Card, plug it into your Pi and boot it up
-
-6) Do an
+### Do an
 
 	sudo apt update -y 
 	sudo apt upgrade -y
 
 setup your password, install some packages etc.
 
-7) Since I will be using the same OS for Netboot client as I am using on the Netboot server I will copy file system of the Netboot Server to a folder, do some configuration and share it to the client.
+### Since I will be using the same OS for Netboot client as I am using on the Netboot server I will copy file system of the Netboot Server to a folder, do some configuration and share it to the client.
 In order to do so, mount the drive(the second partition of the SD Card plug into the Netboot Server). If your server is RPi, SD Card will most likely be recognized as mmcblk0. 
 If that is the case type:
 
@@ -85,7 +83,7 @@ Then copy the OS files from partition 2(if above executed this should be in /mnt
 	sudo mkdir -p /srv/nfs/<RANDOM-NAME>
 	sudo cp -r /mnt/Ubuntu20.04/* /srv/nfs/<RANDOM-NAME>
 
-### NOTE: Since you are almost copying the whole file systems which will double the occupied storage space on the SD card, make sure you have sufficient space available. I used a 32GB SD Card, while with 16GB SD card I got out of space.
+#### NOTE: Since you are almost copying the whole file systems which will double the occupied storage space on the SD card, make sure you have sufficient space available. I used a 32GB SD Card, while with 16GB SD card I got out of space.
 
 After you are done copying clean up with:
 
@@ -99,8 +97,8 @@ After you are done copying clean up with:
 	sudo chroot . rm /etc/ssh/ssh_host_*
 	sudo chroot . dpkg-reconfigure openssh-server
 	sudo chroot . systemctl enable ssh
-
-8) In order to boot a remote client we need to share the boot files with it once requested. This is done with Trivial File Transfer Protocol (TFTP).
+	
+### In order to boot a remote client we need to share the boot files with it once requested. This is done with Trivial File Transfer Protocol (TFTP).
 Mount the /boot folder of the RPi files (stored in the NFS share) to your TFTP location so your TFTP can serve up the boot files
 - Create a TFTP directory
 
@@ -118,13 +116,13 @@ Now any change that will be done in /srv/nfs/<RANDOM-NAME>/boot will also apply 
 This will serve /srv/nfs/<RANDOM-NAME>/boot through the /srv/tftpboot/<RANDOM-NAME> which will enable the Pi to boot up (sends boot related files). 
 We still have to load the OS somehow.
 
-NOTE: The /nfs/<RANDOM-NAME> directory will be the root of the file system for your client Raspberry Pi. If you add more Pis you will need to add more client directories. The /tftpboot directory will be used by all your netbooting Pis. It contains the bootloader and files needed to boot the system. Additionaly NFS Client already requires to be up ("bootloaded") and during the steps here we will also tell where we tell the client during the boot process how to find the (nfs)root file system.
+#### NOTE: The /nfs/<RANDOM-NAME> directory will be the root of the file system for your client Raspberry Pi. If you add more Pis you will need to add more client directories. The /tftpboot directory will be used by all your netbooting Pis. It contains the bootloader and files needed to boot the system. Additionaly NFS Client already requires to be up ("bootloaded") and during the steps here we will also tell where we tell the client during the boot process how to find the (nfs)root file system.
 
-10) Extract your vmlinuz on the boot folder of your nfs share into vmlinux as the Receiving Pi wont decompress the vmlinuz kernel
+### Extract your vmlinuz on the boot folder of your nfs share into vmlinux as the Receiving Pi wont decompress the vmlinuz kernel
 
 	zcat /srv/nfs/<RANDOM-NAME>/boot/vmlinuz > /src/nfs/<RANDOM-NAME>/boot/vmlinux
 
-11) Create symlinks inside the /srv/nfs/<RANDOM-NAME>/boot partition to point to the bcm2711-rpi-4-b.dtb, start4.elf, fixup4.dat files which are missing in the boot folder for the TFTP to find them in the dtb and firmware folders
+### Create symlinks inside the /srv/nfs/<RANDOM-NAME>/boot partition to point to the bcm2711-rpi-4-b.dtb, start4.elf, fixup4.dat files which are missing in the boot folder for the TFTP to find them in the dtb and firmware folders
 This might change overtime and Netboot client will need some other files. The boot log (sudo tail -F /var/log/*.log) will tell you later on what is missing - just make sure it is looking for the following files in the right folder.
 
 	sudo cp /boot/firmware/fixup4.dat /boot/firmware/start4.elf /boot/firmware/syscfg.txt /boot/firmware/usercfg.txt /srv/nfs/netboot_ubuntu_20_04/boot/firmware
@@ -134,7 +132,7 @@ This might change overtime and Netboot client will need some other files. The bo
 	sudo ln -s firmware/start4.elf start4.elf
 	sudo ln -s dtbs/5.4.0-1038-raspi/bcm2711-rpi-4-b.dtb bcm2711-rpi-4-b.dtb
 
-12) Update some configs in the /srv/nfs/<RANDOM-NAME>/boot partition:
+### Update some configs in the /srv/nfs/<RANDOM-NAME>/boot partition:
 
 - Modify /srv/nfs/<RANDOM-NAME>/boot/config.txt, which is a configuration file instead of BIOS in an old PC that initializes hardware, does preliminary system test and configures it according to values specified: 
 
@@ -158,7 +156,7 @@ NOTE: If you mess up this file, your Pi won't be able to boot!
 
 	net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 nfsrootdebug elevator=deadline rootwait fixrtc init=initrd.img ip=dhcp rootfstype=nfs4 root=/dev/nfs nfsroot=<NETBOOT-SERVER-IP>:/srv/nfs/<RANDOM-NAME>,vers=4.1,proto=tcp rw
 
-13) Update the fstab - this is the fstab which is sent to the Netbooted Pi and on the boot mounts the nfs file system from the NFS Server
+### Update the fstab - this is the fstab which is sent to the Netbooted Pi and on the boot mounts the nfs file system from the NFS Server
 
 - /srv/nfs/<RANDOM-NAME>/etc/fstab
 
@@ -179,7 +177,7 @@ then type in terminal:
 	sudo systemctl enable nfs-kernel-server
 	sudo systemctl restart nfs-kernel-server
 
-15) In order to send the boot files and file system we now need to modify the dnsmasq configuration to enable DHCP to reply to the device (when it is pinging the network for a DHCP response in step 3).
+### In order to send the boot files and file system we now need to modify the dnsmasq configuration to enable DHCP to reply to the device (when it is pinging the network for a DHCP response in step 3).
 Install a dnsmasq server to serve up the dhcp options and tftp the boot images
 
 	sudo apt install dnsmasq
@@ -203,7 +201,7 @@ and modify /etc/dnsmasq.conf:
 	pxe-service=0,"Raspberry Pi Boot"
 	log-facility=/var/log/dnsmasq.log
 
-16) Now if you restart dnsmasq service you should be seeing netboot log by typing:
+### Now if you restart dnsmasq service you should be seeing netboot log by typing:
 
 	sudo systemctl enable dnsmasq.service
 	sudo systemctl restart dnsmasq.service
@@ -213,7 +211,7 @@ Also see stats from the NFS Server:
 
 	sudo nfsstat
 
-17) If you successfully netboot-ed Raspberry Pi you will see output of above command tail, like:
+### If you successfully netboot-ed Raspberry Pi you will see output of above command tail, like:
 
 	Jul  6 05:48:56 dnsmasq-dhcp[4322]: 1795937487 tags: eth0
 	Jul  6 05:48:56 dnsmasq-dhcp[4322]: 1795937487 broadcast response
@@ -270,4 +268,4 @@ Also see stats from the NFS Server:
 
 I don't know why it fails to sent some of the files and in the next try succeeds to do so, but important is that relevant files gets transferred and that you use that client provides back the IP and the hostname. Now you can SSH into the client.
 
-# NOTE: This post is regularly updated, make sure you use it on your on resposiblity.
+#### NOTE: This post is regularly updated, make sure you use it on your on resposiblity.

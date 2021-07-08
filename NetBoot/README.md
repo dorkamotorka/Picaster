@@ -163,7 +163,7 @@ NOTE: If you mess up this file, your Pi won't be able to boot!
 	<NETBOOT-SERVER-IP>:/srv/nfs/<RANDOM-NAME> /       nfs4     defaults,rw,nolock,proto=tcp,vers=4.1             0       0 # data to be shared to server
 
 ### Up to this stage we did a neccesary configuration that will send boot files to the Netboot client, but in order for the client to be fully-functional we also need to serve the rootfile system.
-In order to do so, install an NFS server on the RPi Netboot Server:
+To do so, install an NFS server on the RPi Netboot Server:
 
 	sudo apt install nfs-common nfs-kernel-server
 

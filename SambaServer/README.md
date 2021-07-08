@@ -3,14 +3,6 @@
 Samba is a re-implementation of the SMB (Server Message Block) networking protocol and allows Linux computers to integrate into Microsoft’s active directory environments seamlessly.
 By using Samba on our Raspberry Pi, we can easily share directories in a way that they can be accessed on almost every operating system.
 
-## SMB (Server Message Block)
-
-SMB is a file sharing protocol that was invented by IBM and has been around since the mid-eighties.
-
-## What is /etc/fstab?
-
-fstab is a system's filesystem table, that is used to define a set of rules how different filesystems are treated each time they are introduced to a system.(e.g. when you plugin USB stick, should it be automatically mounted to the filesystem OR in case of Samba to automatically mount shared file system when detected) 
-
 ## Samba Pi Server & Client
 
 ### Install dependencies

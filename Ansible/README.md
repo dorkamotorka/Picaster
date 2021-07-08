@@ -22,4 +22,4 @@ If you get an error like
 Try resolving with(On the Ansible server):
 	
 	ssh-keygen -t rsa
-	ssh-copy-id <SERVER-USER>@<SERVER-IP>
+	ssh-copy-id <ANSIBLE-CLIENT>@<ANSIBLE-CLIENT>

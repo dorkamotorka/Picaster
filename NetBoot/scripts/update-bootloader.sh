@@ -35,8 +35,8 @@ ssh -tt pi@${RPI_IP} << EOF
 	sudo rpi-eeprom-config ${PI_EEPROM_FILE} > bootconf.txt
 
 	echo ">> Updating bootconfig"
-	sed -i 's/BOOT_ORDER=.*/BOOT_ORDER=0xf12/g' bootconf.txt
 	echo "MAX_RESTARTS=5" | sudo tee -a bootconf.txt
+	echo "BOOT_ORDER=0xf12" | sudo tee -a bootconf.txt
 
 	echo ">> Writing EEPROM"
 	sudo rpi-eeprom-config --out ${PI_EEPROM_VERSION}-netboot.bin --config bootconf.txt ${PI_EEPROM_FILE}

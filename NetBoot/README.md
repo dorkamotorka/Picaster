@@ -269,3 +269,16 @@ Also see stats from the NFS Server:
 I don't know why it fails to sent some of the files and in the next try succeeds to do so, but important is that relevant files gets transferred and that you use that client provides back the IP and the hostname. Now you can SSH into the client.
 
 #### NOTE: This post is regularly updated, make sure you use it on your on resposiblity.
+
+### Troubleshooting
+
+##### Problem 1:
+
+	sudo: /usr/bin/sudo must be owned by uid 0 and have the setuid bit set
+
+###### Solution 1:
+
+On the Netboot server chroot into Netboot root fs and change permission:
+
+	sudo chroot <NETBOOT-ROOTFS> 
+	chown root:root /usr/bin/sudo && chmod 4755 /usr/bin/sudo

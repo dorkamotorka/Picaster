@@ -184,6 +184,7 @@ Install a dnsmasq server to serve up the dhcp options and tftp the boot images
 	sudo apt install dnsmasq
 
 then we need to figure out what is the broadcast address of our local network. We do that by typing:
+		
 	ip -4 addr show dev eth0 | grep inet	
 
 which should give an output like:

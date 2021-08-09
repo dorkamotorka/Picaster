@@ -51,6 +51,7 @@ In order to make sure Netboot client is pinging the network, type on any device 
 
 	sudo tcpdump -i <network-interface> port bootpc
 e.g.
+
 	sudo tcpdump -i eth0 port bootpc # On my RPi Netboot Server
 	sudo tcpdump -i wlp4s0 port bootpc # On my PC
 

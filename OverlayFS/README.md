@@ -25,7 +25,3 @@ Usage points, when a process:
 - removes a file from the /lower directory, overlayfs will delete it from the read-only /lower directory
 - removes a file from the /upper directory, overlayfs will delete it in the /upper and /merged directory
 
-
-There is no special thing to tell, that if you want to preserve the state of both merged upper and lower layes in the /merged directory, it should only be copied to the read-only layer such:
-
-	cp /merged /lower
